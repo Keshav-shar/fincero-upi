@@ -2,104 +2,103 @@
 
 A UPI payments app that teaches you finance while you pay.
 
-Fincero works like any UPI app for real payments. Alongside it runs a simulated economy of **ceros**, a practice currency you earn by using the app and spend on a shared, simulated stock market.
+Fincero handles your everyday UPI payments. Alongside them runs a shared market where you practise investing with **ceros**, a currency you earn just by using the app.
 
-## What you can do
+Fincero is in active development.
 
-**Payments (₹)**
-- Link your bank account and pay or receive through UPI ID, QR code or phone number
-- Check your bank balance and see your transaction history
-- Hear incoming payments announced out loud while the app is open
+## Features
 
-**Ceros**
-- Earn 1 cero every day you open the app
-- Earn ceros when you pay a merchant, based on the amount you pay
-- Spend ceros in the market (see below)
+### UPI payments
 
-**Market simulation**
-- Buy and sell 5 default stocks, with stop-loss, price history and trend predictions
-- Follow a 3-stock index and invest in mutual funds
-- Create your own stock for 1500 ceros and write a pitch to attract buyers
-- Creators pay a daily tax of 1% of their starting amount, which keeps the market moving
-- Everyone sees the same market, and prices move on a fixed digit sequence built from pi and √2
+- Link your bank account and create your UPI ID
+- Pay by UPI ID, QR code or phone number
+- Receive money, and approve merchant collect requests
+- Check your bank balance on demand
+- See your transaction history and raise a dispute
+- Hear incoming payments announced aloud while the app is open
 
-**Assistant**
-- On the previous-transactions page, ask the chatbot about your own spending and payments. It only answers questions about your transactions, ceros and the finance behind them.
+### Ceros
 
-## How amounts are shown
+- Earn 1 cero for each day you open the app
+- Earn 1 cero per whole rupee paid to a verified merchant, up to a daily limit
+- Spend ceros in the market
+
+### Market
+
+- Trade 5 default stocks, follow a 3-stock index, and invest in mutual funds
+- Protect a position with a stop-loss, or short a stock you expect to fall
+- Create your own stock for 1,500.00 ceros and write a pitch for buyers
+- Pay a daily tax of 1% of your starting amount while your stock is listed
+- See price history and trend estimates
+
+The market is shared, so every user sees the same prices. Buying pushes a price up and selling pushes it down, and charts refresh every 20 seconds. Every 20 minutes, each stock also takes a percent update.
+
+### Assistant
+
+Ask the chatbot on your transactions page about your spending, your ceros and the finance behind them. It reads your own data only, and it can't move money.
+
+## Amounts
 
 | Currency | Format | Example |
 |----------|--------|---------|
-| Rupees | 2 decimals | ₹1,234.50 |
-| Ceros | 5 decimals | 1,500.00000 |
+| Rupees | 2 decimals | ₹1,23,456.78 |
+| Ceros | 2 decimals | 1,500.00 |
 
 ## Tech stack
 
 | Part | Built with |
 |------|------------|
-| Mobile app | React Native (TypeScript) |
+| Mobile app | React Native and Expo (TypeScript) |
 | Server | C++20 with Drogon |
-| Shared logic | C++ core library used by both the app and the server |
-| Database | PostgreSQL, with Redis for caching |
+| Shared logic | C++ core library used by the app and the server |
+| Data | PostgreSQL, with Redis for rate limits and live updates |
 | Assistant | Anthropic API, called from the server |
 | Payments | UPI through a payment service provider |
 
 ## Getting started
 
-You will need Node.js (LTS), pnpm, CMake, Ninja, a C++20 compiler, vcpkg, Docker, and Android Studio for running the app on Android.
-
-**1. Clone and configure**
+You need Docker. All C++ tools run inside a pinned image, so nothing else is required to build.
 
 ```
-git clone <repo-url>
-cd fincero
-cp .env.example .env
+git clone https://github.com/Keshav-shar/fincero-upi.git
+cd fincero-upi
+./dev test
 ```
 
-Open `.env` and fill in your database URL, Redis URL and Anthropic API key. Never commit this file.
+The first build compiles every dependency and takes a while. Later builds use a cache.
 
-**2. Start the database and cache**
+| Command | What it does |
+|---------|--------------|
+| `./dev build [preset]` | Configure and build |
+| `./dev test [preset]` | Build and run the tests |
+| `./dev check` | Check module boundaries, core purity and migrations |
+| `./dev format` | Format the C++ code |
+| `./dev shell` | Open a shell in the toolchain |
+
+Presets: `dev` (default), `asan`, `tsan`, `fuzz`, `ci`, `ci-gcc`, `release`.
+
+To start the database and cache, set `POSTGRES_PASSWORD` and `REDIS_PASSWORD` in your shell, then run:
 
 ```
 docker compose up -d postgres redis
 ```
 
-**3. Build and run the server**
-
-```
-cmake --preset dev
-cmake --build --preset dev
-./build/dev/server/fincero_server
-```
-
-**4. Run the app**
-
-```
-cd client
-pnpm install
-pnpm android
-```
-
-**5. Run the tests**
-
-```
-ctest --preset dev --output-on-failure     # server and core
-cd client && pnpm test                     # app
-```
+Both refuse to start without a password. Never commit secrets.
 
 ## Project layout
 
 ```
-core/         shared C++ logic (money, ledger rules, market engine)
-server/       API server
-sandbox_psp/  UPI simulator for development
-client/       React Native app
-db/           database migrations
-docs/         specs and design notes
+core/     shared C++ logic: money, ledger rules, market engine
+server/   API server and its modules
+client/   React Native app
+api/      OpenAPI definition
+db/       database migrations
+tools/    developer tools
+tests/    integration tests and fuzzers
 ```
 
 ## Good to know
 
 - **Ceros are not money.** They can't be bought, cashed out or exchanged for anything of value.
-- **Not investment advice.** The market is a simulation made for learning.
-- **Development uses a simulated UPI service.** Real payments need an approved payment partner and its SDK. Your UPI PIN is only ever entered in the partner's secure screen, never in Fincero's own code.
+- **The market is an educational simulation, not investment advice.**
+- **Your UPI PIN stays private.** You enter it only in the payment partner's secure screen, never in Fincero's own code.

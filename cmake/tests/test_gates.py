@@ -52,6 +52,10 @@ class BoundaryGate(unittest.TestCase):
         errors = check_boundaries.check(graph([("fincero_assistant", "fincero_rng")]))
         self.assertTrue(any("Rule 7" in error for error in errors))
 
+    def test_unlisted_target_reaching_rng_api_fails(self) -> None:
+        errors = check_boundaries.check(graph([("fincero_assistant", "fincero_rng_api")]))
+        self.assertTrue(any("Rule 7" in error for error in errors))
+
     def test_prediction_reaching_rng_fails(self) -> None:
         self.assertTrue(check_boundaries.check(graph([("fincero_prediction", "fincero_rng")])))
 

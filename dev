@@ -30,7 +30,8 @@ in_toolchain() {
     docker compose --profile tools run --rm "$service" bash -euo pipefail -c "$1"
 }
 
-sources='git ls-files --cached --others --exclude-standard -- "*.cpp" "*.hpp"'
+# Includes the gitignored private sources, which git ls-files would skip.
+sources='{ git ls-files --cached --others --exclude-standard -- "*.cpp" "*.hpp"; find core/rng tools/gen_digits -name "*.cpp" -o -name "*.hpp" 2>/dev/null || true; }'
 
 case "$command" in
     build)

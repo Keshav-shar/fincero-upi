@@ -20,6 +20,12 @@ secrets/
 
 *.log
 __pycache__/
+
+# Private market source. core/rng_stub stands in for public builds.
+core/rng/
+tools/gen_digits/
+assets/digits/
+
 .DS_Store
 .idea/
 .vscode/

@@ -23,6 +23,7 @@ CORE_TARGETS = {
     "fincero_upi_text",
     "fincero_ledger_rules",
     "fincero_txn",
+    "fincero_rng_api",
     "fincero_rng",
     "fincero_market_model",
     "fincero_economy_rules",
@@ -37,14 +38,17 @@ FORBIDDEN = [
     ("fincero_market", "fincero_ledger_inr", "Rule 2: the market runs on ceros only"),
     ("fincero_prediction", "fincero_rng", "Rule 7: predictions use history only"),
     ("fincero_market_model", "fincero_rng", "Digits are an input to the price model"),
+    ("fincero_market_model", "fincero_rng_api", "Digits are an input to the price model"),
     ("fincero_core_client", "fincero_rng", "Rule 7: RNG never ships to clients"),
     ("fincero_client_binding", "fincero_rng", "Rule 7: RNG never ships to clients"),
     ("fincero_client_binding", "fincero_market_model", "Clients get money formatting only"),
 ]
 
 # The only targets that may reach the RNG. Test binaries are matched by suffix.
+RNG_TARGETS = ("fincero_rng", "fincero_rng_api")
 RNG_ALLOWED = {
     "fincero_rng",
+    "fincero_rng_api",
     "fincero_core",
     "fincero_market",
     "fincero_server",
@@ -95,8 +99,9 @@ def check(text: str) -> list[str]:
     for target in sorted(known):
         if target in RNG_ALLOWED or target.endswith("_tests"):
             continue
-        if "fincero_rng" in reachable(target, edges):
-            errors.append(f"{target} reaches fincero_rng: only the market may (Rule 7)")
+        for rng_target in RNG_TARGETS:
+            if rng_target in reachable(target, edges):
+                errors.append(f"{target} reaches {rng_target}: only the market may (Rule 7)")
 
     return errors
 

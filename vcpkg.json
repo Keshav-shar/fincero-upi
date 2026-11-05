@@ -3,13 +3,25 @@
   "version-string": "0.0.0",
   "description": "UPI payments app that teaches finance through a simulated economy.",
   "dependencies": [
-    { "name": "drogon", "features": ["postgres"] },
-    "gmp",
+    {
+      "name": "drogon",
+      "features": [
+        "postgres"
+      ]
+    },
     "gtest",
     "jsoncons",
     "libsodium",
-    "mpfr",
     "rapidcheck",
     "spdlog"
-  ]
+  ],
+  "features": {
+    "offline-tools": {
+      "description": "Dependencies of private offline tools.",
+      "dependencies": [
+        "gmp",
+        "mpfr"
+      ]
+    }
+  }
 }
