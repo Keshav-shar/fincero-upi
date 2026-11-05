@@ -2,6 +2,8 @@
 
 namespace fincero::server::assistant {
 
-const char* module_name() noexcept { return "assistant"; }
+const char* module_name() noexcept {
+    return "assistant";
+}
 
 } // namespace fincero::server::assistant

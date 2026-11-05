@@ -2,6 +2,8 @@
 
 namespace fincero::economy {
 
-const char* module_name() noexcept { return "economy"; }
+const char* module_name() noexcept {
+    return "economy";
+}
 
 } // namespace fincero::economy

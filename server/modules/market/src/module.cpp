@@ -2,6 +2,8 @@
 
 namespace fincero::server::market {
 
-const char* module_name() noexcept { return "market"; }
+const char* module_name() noexcept {
+    return "market";
+}
 
 } // namespace fincero::server::market

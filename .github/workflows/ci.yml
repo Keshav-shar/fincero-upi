@@ -114,7 +114,8 @@ jobs:
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-      options: --user 0
+      # ThreadSanitizer needs a syscall that the default seccomp profile blocks (ADR-005).
+      options: --user 0 ${{ matrix.preset == 'tsan' && '--security-opt seccomp=unconfined' || '' }}
     strategy:
       fail-fast: false
       matrix:

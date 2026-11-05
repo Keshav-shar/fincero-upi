@@ -2,6 +2,8 @@
 
 namespace fincero::ledger {
 
-const char* module_name() noexcept { return "ledger"; }
+const char* module_name() noexcept {
+    return "ledger";
+}
 
 } // namespace fincero::ledger

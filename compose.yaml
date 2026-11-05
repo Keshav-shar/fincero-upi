@@ -18,6 +18,14 @@ services:
       - build:/build
       - vcpkg-cache:/vcpkg-cache
 
+  # ThreadSanitizer only: it must call personality(ADDR_NO_RANDOMIZE), which Docker's
+  # default seccomp profile blocks. Runs our own code, still non-root. See ADR-005.
+  toolchain-tsan:
+    extends:
+      service: toolchain
+    security_opt:
+      - seccomp=unconfined
+
   postgres:
     image: postgres:18-bookworm@sha256:5c4783a8cc3f0074912164f94dfa1be4e043438f0f707cf968d7af9a0d31a2c8
     environment:

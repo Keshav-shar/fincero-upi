@@ -11,7 +11,6 @@ TEST(Smoke, CoreTargetLinks) {
 }
 
 TEST(Smoke, PropertyFrameworkRuns) {
-    EXPECT_TRUE(rc::check("xor with zero is identity", [](int value) {
-        RC_ASSERT((value ^ 0) == value);
-    }));
+    EXPECT_TRUE(
+        rc::check("xor with zero is identity", [](int value) { RC_ASSERT((value ^ 0) == value); }));
 }

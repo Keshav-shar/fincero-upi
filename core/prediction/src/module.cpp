@@ -2,6 +2,8 @@
 
 namespace fincero::prediction {
 
-const char* module_name() noexcept { return "prediction"; }
+const char* module_name() noexcept {
+    return "prediction";
+}
 
 } // namespace fincero::prediction

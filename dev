@@ -20,8 +20,14 @@ if [[ ! "$preset" =~ ^[a-z][a-z-]*$ ]]; then
     exit 2
 fi
 
+# Only the tsan preset gets the service with the relaxed seccomp profile.
+service=toolchain
+if [[ "$preset" == "tsan" ]]; then
+    service=toolchain-tsan
+fi
+
 in_toolchain() {
-    docker compose --profile tools run --rm toolchain bash -euo pipefail -c "$1"
+    docker compose --profile tools run --rm "$service" bash -euo pipefail -c "$1"
 }
 
 sources='git ls-files --cached --others --exclude-standard -- "*.cpp" "*.hpp"'

@@ -14,7 +14,9 @@ TEST(Dependencies, PlatformTargetLinks) {
     EXPECT_EQ(std::string_view{fincero::server::platform::module_name()}, "platform");
 }
 
-TEST(Dependencies, SodiumInitialises) { EXPECT_GE(sodium_init(), 0); }
+TEST(Dependencies, SodiumInitialises) {
+    EXPECT_GE(sodium_init(), 0);
+}
 
 TEST(Dependencies, JsonconsParses) {
     const auto value = jsoncons::json::parse(R"({"amount_paise":"12345"})");

@@ -2,6 +2,8 @@
 
 namespace fincero::base {
 
-const char* module_name() noexcept { return "base"; }
+const char* module_name() noexcept {
+    return "base";
+}
 
 } // namespace fincero::base

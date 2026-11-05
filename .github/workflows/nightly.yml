@@ -9,15 +9,28 @@ permissions:
   contents: read
 
 jobs:
+  # Finds the image pushed by ci.yml. hashFiles only works in steps, and GHCR names
+  # must be lowercase, which github.repository is not guaranteed to be.
+  image:
+    runs-on: ubuntu-24.04
+    outputs:
+      ref: ${{ steps.ref.outputs.ref }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - id: ref
+        env:
+          DOCKERFILE_HASH: ${{ hashFiles('docker/toolchain.Dockerfile') }}
+        run: echo "ref=ghcr.io/${GITHUB_REPOSITORY,,}/toolchain:${DOCKERFILE_HASH}" >> "$GITHUB_OUTPUT"
+
   long-fuzz:
+    needs: image
     runs-on: ubuntu-24.04
     timeout-minutes: 120
     permissions:
       contents: read
       packages: read
     container:
-      # Pushed by ci.yml, tagged by Dockerfile hash.
-      image: ghcr.io/${{ github.repository }}/toolchain:${{ hashFiles('docker/toolchain.Dockerfile') }}
+      image: ${{ needs.image.outputs.ref }}
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}

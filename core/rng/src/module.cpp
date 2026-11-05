@@ -2,6 +2,8 @@
 
 namespace fincero::rng {
 
-const char* module_name() noexcept { return "rng"; }
+const char* module_name() noexcept {
+    return "rng";
+}
 
 } // namespace fincero::rng
