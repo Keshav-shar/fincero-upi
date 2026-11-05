@@ -1,0 +1,60 @@
+# Local development only. Passwords come from your shell environment and are never
+# stored here: see docs/ENVIRONMENT.md. Postgres and Redis refuse to start without one.
+name: fincero
+
+services:
+  # Not started by `up`; used through ./dev.
+  toolchain:
+    profiles: [tools]
+    build:
+      context: .
+      dockerfile: docker/toolchain.Dockerfile
+    image: fincero/toolchain:dev
+    working_dir: /work
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - .:/work
+      - build:/build
+      - vcpkg-cache:/vcpkg-cache
+
+  postgres:
+    image: postgres:18-bookworm@sha256:5c4783a8cc3f0074912164f94dfa1be4e043438f0f707cf968d7af9a0d31a2c8
+    environment:
+      POSTGRES_DB: fincero
+      POSTGRES_USER: fincero
+      POSTGRES_PASSWORD:
+    ports:
+      - "127.0.0.1:5432:5432"
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fincero -d fincero"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:8-bookworm@sha256:99ffb973380cc2f47bca06bd094f7f8c7138a0879a63cb8939896a22b7a65bba
+    environment:
+      REDIS_PASSWORD:
+    command:
+      - sh
+      - -c
+      - ': "$${REDIS_PASSWORD:?REDIS_PASSWORD must be set}"; exec redis-server --requirepass "$$REDIS_PASSWORD"'
+    ports:
+      - "127.0.0.1:6379:6379"
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  build:
+  vcpkg-cache:
+  pgdata:

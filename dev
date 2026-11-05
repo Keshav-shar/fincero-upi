@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# Runs project commands inside the pinned toolchain container.
+#   ./dev build [preset]     configure and build (default preset: dev)
+#   ./dev test  [preset]     configure, build and run tests
+#   ./dev check [preset]     boundary, purity and migration gates
+#   ./dev format             apply clang-format
+#   ./dev format-check       fail if anything is unformatted
+#   ./dev image              rebuild the toolchain image
+#   ./dev shell              open a shell in the toolchain
+set -euo pipefail
+
+# Stop Git Bash on Windows from rewriting container paths such as /work.
+export MSYS_NO_PATHCONV=1
+
+command="${1:-help}"
+preset="${2:-dev}"
+
+if [[ ! "$preset" =~ ^[a-z][a-z-]*$ ]]; then
+    echo "invalid preset: $preset" >&2
+    exit 2
+fi
+
+in_toolchain() {
+    docker compose --profile tools run --rm toolchain bash -euo pipefail -c "$1"
+}
+
+sources='git ls-files --cached --others --exclude-standard -- "*.cpp" "*.hpp"'
+
+case "$command" in
+    build)
+        in_toolchain "cmake --preset $preset && cmake --build --preset $preset"
+        ;;
+    test)
+        in_toolchain "cmake --preset $preset && cmake --build --preset $preset \
+            && ctest --preset $preset"
+        ;;
+    check)
+        in_toolchain "cmake --preset $preset --graphviz=\"\$FINCERO_BUILD_ROOT/$preset/targets.dot\" >/dev/null \
+            && python3 cmake/check_boundaries.py \"\$FINCERO_BUILD_ROOT/$preset/targets.dot\" \
+            && python3 cmake/check_core_purity.py core \
+            && python3 cmake/check_migrations.py db/migrations"
+        ;;
+    format)
+        in_toolchain "$sources | xargs -r clang-format -i"
+        ;;
+    format-check)
+        in_toolchain "$sources | xargs -r clang-format --dry-run --Werror"
+        ;;
+    image)
+        docker compose --profile tools build toolchain
+        ;;
+    shell)
+        docker compose --profile tools run --rm toolchain bash
+        ;;
+    *)
+        sed -n '2,8p' "$0"
+        ;;
+esac

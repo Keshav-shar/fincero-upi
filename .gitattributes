@@ -1,0 +1,6 @@
+# Force LF everywhere: the repo is bind-mounted into a Linux toolchain from Windows.
+* text=auto eol=lf
+
+*.png  binary
+*.webp binary
+*.bin  binary

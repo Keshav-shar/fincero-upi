@@ -1,0 +1,41 @@
+name: nightly
+
+on:
+  schedule:
+    - cron: "30 20 * * *" # 02:00 IST
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  long-fuzz:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    permissions:
+      contents: read
+      packages: read
+    container:
+      # Pushed by ci.yml, tagged by Dockerfile hash.
+      image: ghcr.io/${{ github.repository }}/toolchain:${{ hashFiles('docker/toolchain.Dockerfile') }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      options: --user 0
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: /vcpkg-cache
+          key: vcpkg-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json', 'docker/toolchain.Dockerfile') }}
+      - run: cmake --preset fuzz
+      - run: cmake --build --preset fuzz
+      - name: 10 minutes per target
+        run: |
+          find "$FINCERO_BUILD_ROOT/fuzz/tests/fuzz" -maxdepth 1 -type f -executable -name 'fuzz_*' \
+            -exec {} -max_total_time=600 \;
+
+  # Added with the milestone that gives them something to run:
+  #   econ_sim        M3  parameter sweep against the pass criteria
+  #   market_replay   M3  full replay from genesis
+  #   detox           M6  end-to-end client flows

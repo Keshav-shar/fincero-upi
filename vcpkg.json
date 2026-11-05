@@ -1,0 +1,15 @@
+{
+  "name": "fincero",
+  "version-string": "0.0.0",
+  "description": "UPI payments app that teaches finance through a simulated economy.",
+  "dependencies": [
+    { "name": "drogon", "features": ["postgres"] },
+    "gmp",
+    "gtest",
+    "jsoncons",
+    "libsodium",
+    "mpfr",
+    "rapidcheck",
+    "spdlog"
+  ]
+}

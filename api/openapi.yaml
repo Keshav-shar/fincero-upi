@@ -1,0 +1,6 @@
+# Source of truth for the API. Endpoints arrive with M2.
+openapi: 3.1.0
+info:
+  title: Fincero API
+  version: 0.0.0
+paths: {}
